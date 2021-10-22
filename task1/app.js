@@ -1,4 +1,4 @@
-const http = require('http');s
+const http = require('http');
 const { APP_PORT, ENV } = require('./config.js');
 const logger = require('./logger');
 
