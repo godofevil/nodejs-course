@@ -14,36 +14,69 @@ http.createServer((req: IncomingMessage, res: ServerResponse) => {
     const { method, url } = req;
     let body: any;
 
-    const log = (message: string = '') => {
-        logger.info(`Request type: ${method}, Request url: ${url}, Message: ${message}`);
-        res.end(message);
-    }
-
-    const requestHandler = () => {
-        let text: string = '';
-
-        if(method === 'GET') {
-            text = 'Get movie';
-        } else if (method === 'POST') {
-            text = 'Add movie';
-        } else {
-            logger.error('Wrong method')
-        }
-
+    const parseBody = () => {
         req.on('data', data => {
-            body = JSON.parse(data.toString()).title;
+            if(data) {
+                body = JSON.parse(data.toString()).title;
+            }
         })
         .on('end', () => {
-            log(body ? `${text} ${body}` : 'Movie page')
+            res.end();
         })
     }
 
-    if(url ==='/movie') {
-        requestHandler()
-    } else if (url === '/' ) {
-        log('Home page');
-    } else {
-        logger.error('No such url');
+    const log = () =>
+        logger.info(`Request type: ${method}, Request url: ${url}, Message: ${method} movie '${body}'`);
+
+
+    const handler = {
+        getMovie: async () => {
+            await parseBody();
+            // Some logic
+            log();
+        },
+        postMovie: async () => {
+            await parseBody();
+            // Some logic
+            log();
+        },
+        deleteMovie: async () => {
+            await parseBody()
+            // Some logic
+            log();
+        }
+    }
+
+    switch(url) {
+        case '/movie': {
+            switch(method) {
+                case 'GET': {
+                    handler.getMovie();
+                    return;
+                }
+                case 'POST': {
+                    handler.postMovie();
+                    return;
+                }
+                case 'DELETE': {
+                    handler.deleteMovie();
+                    return;
+                }
+                default: {
+                    logger.error('wrong request')
+                    res.end();
+                }
+            };
+        }
+        case '/': {
+            logger.info(`Request type: ${method}, Request url: ${url}`);
+            res.end(`Home page`);
+            return;
+        }
+        default: {
+            logger.error(`Wrong url: ${url}`);
+            res.end(`Wrong url`);
+        }
     }
 })
 .listen(APP_PORT, "127.0.0.1", () => {
