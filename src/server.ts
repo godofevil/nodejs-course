@@ -6,6 +6,7 @@ import { logger } from './logger';
     Request examples:
     curl http://localhost:4000/movie -X POST --data '{"title": "Matrix"}'
     curl http://localhost:4000/movie -X GET --data '{"title": "Avatar"}'
+    curl http://localhost:4000/movie -X GET --data '@test.json'
 */
 
 const { APP_PORT, ENV } = config;
@@ -13,21 +14,21 @@ const { APP_PORT, ENV } = config;
 http.createServer((req: IncomingMessage, res: ServerResponse) => {
     const { method, url } = req;
     let body: any;
+    const chunks: Buffer[] = [];
 
     const parseBody = () => {
         req.on('data', data => {
-            if(data) {
-                body = JSON.parse(data.toString()).title;
-            }
+            chunks.push(data);
         })
         .on('end', () => {
-            res.end();
-        })
+            const temp = Buffer.concat(chunks).toString();
+            body = JSON.parse(temp);
+            res.end(temp);
+        });
     }
 
     const log = () =>
-        logger.info(`Request type: ${method}, Request url: ${url}, Message: ${method} movie '${body}'`);
-
+        logger.info(`Request type: ${method}, Request url: ${url}, Message: ${method} movie '${body?.title}'`);
 
     const handler = {
         getMovie: async () => {
