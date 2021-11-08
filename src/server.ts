@@ -23,6 +23,7 @@ http.createServer((req: IncomingMessage, res: ServerResponse) => {
         .on('end', () => {
             const temp = Buffer.concat(chunks).toString();
             body = JSON.parse(temp);
+            log();
             res.end(temp);
         });
     }
@@ -34,17 +35,14 @@ http.createServer((req: IncomingMessage, res: ServerResponse) => {
         getMovie: async () => {
             await parseBody();
             // Some logic
-            log();
         },
         postMovie: async () => {
             await parseBody();
             // Some logic
-            log();
         },
         deleteMovie: async () => {
             await parseBody()
             // Some logic
-            log();
         }
     }
 
